@@ -345,6 +345,23 @@
         document.getElementById('btn-cardio').classList.toggle('bg-emerald-500', isCardio);
         renderLists(); updateCoachFeedback(calT, carbT); saveData();
     }
+    window.resetData = function() {
+        if (confirm("確定要重置今日的所有數據嗎？(自定義選單會保留)")) {
+            // 1. 數值歸零
+            totalCalories = 0;
+            totalProtein = 0;
+            totalCarbs = 0;
+            totalWater = 0;
+            foodLog = [];
+            
+            // 2. 更新介面並存檔
+            updateUI();
+            
+            // 3. 切換回首頁並給予提示
+            window.switchPage('home');
+            alert("今日數據已歸零！");
+        }
+    }
     loadData(); updateUI();
 </script>
 </body>
