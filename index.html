@@ -16,19 +16,19 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Montserrat:wght@700;900&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; letter-spacing: -0.01em; }
-        。font-montserrat { font-family: 'Montserrat', sans-serif; }
-        。glass-dark { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        。bento-card { border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        。mode-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; transition: all 0.3s; border-radius: 1rem; }
-        。mode-active { background-color: #ffffff !important; color: #0f172a !important; font-weight: 900 !important; transform: scale(1.05); }
-        。nav-capsule { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 280px; padding: 8px; background: rgba(15, 23, 42, 0.95); border-radius: 2rem; display: flex; z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
-        。nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; transition: 0.3s; }
-        。nav-item.active { color: #10b981; }
-        。progress-bar { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .font-montserrat { font-family: 'Montserrat', sans-serif; }
+        .glass-dark { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .bento-card { border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .mode-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; transition: all 0.3s; border-radius: 1rem; }
+        .mode-active { background-color: #ffffff !important; color: #0f172a !important; font-weight: 900 !important; transform: scale(1.05); }
+        .nav-capsule { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 280px; padding: 8px; background: rgba(15, 23, 42, 0.95); border-radius: 2rem; display: flex; z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; transition: 0.3s; }
+        .nav-item.active { color: #10b981; }
+        .progress-bar { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
         @keyframes alert-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        。bar-overlimit { animation: alert-pulse 0.8s infinite !important; background-color: #ef4444 !important; }
-        。bar-warning { background-color: #f97316 !important; }
-        。btn-interact:active { transform: scale(0.94); }
+        .bar-overlimit { animation: alert-pulse 0.8s infinite !important; background-color: #ef4444 !important; }
+        .bar-warning { background-color: #f97316 !important; }
+        .btn-interact:active { transform: scale(0.94); }
     </style>
 </head>
 <body class="pb-32 text-left">
@@ -215,7 +215,7 @@
         }
     }
 
-    window。setEntryType = (type) => {
+    window.setEntryType = (type) => {
         currentEntryType = type;
         hapticFeedback();
         const mealBtn = document.getElementById('type-meal'), drinkBtn = document.getElementById('type-drink');
@@ -248,14 +248,14 @@
     };
 
     // 💡 關鍵修正：加入錯誤處理
-    recognition。onerror = (event) => {
-        console。error("語音辨識錯誤:", event.error);
+    recognition.onerror = (event) => {
+        console.error("語音辨識錯誤:", event.error);
         if (event.error === 'not-allowed') {
             alert("麥克風權限被拒絕，請檢查瀏覽器設定或是否使用 HTTPS。");
         } else if (event.error === 'no-speech') {
             alert("沒偵測到聲音，請再試一次。");
         }
-        micBtn。innerText = '🎙️';
+        micBtn.innerText = '🎙️';
     };
 
     recognition.onresult = (event) => {
@@ -272,7 +272,7 @@
     };
 
     try {
-        recognition。start();
+        recognition.start();
     } catch (e) {
         console.log("辨識啟動失敗:", e);
     }
@@ -291,12 +291,12 @@
         
         1. Subway 6吋堡基準：350k/25P/45C。
         2. 手搖飲700ml無糖鮮奶茶：170k/8P/12C，無糖則碳水僅來自鮮奶乳糖。
-        3. 熟雞胸肉100g含23P。
+        3. 熟雞胸肉100g含31P。
         請嚴格回傳 JSON：{"name":"名稱","kcal":數字,"protein":數字,"carbs":數字,"confidence":0-1,"reasoning":"計算邏輯"}`;
 
         try {
             const response = await fetch(GEMINI_URL, {
-                method: 'POST'，
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2 } })
             });
@@ -388,7 +388,7 @@
     // --- 6. 紀錄邏輯 ---
     window.saveAndAddMeal = function() {
         const n = document.getElementById('manual-name').value.trim();
-        const c = parseFloat(document.getElementById('manual-cal').value)||0, p = parseFloat(document.getElementById('manual-pro').value)||0, carb = parseFloat(document.getElementById('manual-carb').value)||0;
+        const c = parseFloat(document.getElementById('manual-cal').value)||0, p = parseFloat(document.getElementById('manual-pro').value)||0, carb = parseFloat(document。getElementById('manual-carb').value)||0;
         if (!n) return;
         if (editingIndex > -1) { customMeals[editingIndex] = { n, c, p, carb, type: currentEntryType }; editingIndex = -1; }
         else { customMeals.push({ n, c, p, carb, type: currentEntryType }); }
