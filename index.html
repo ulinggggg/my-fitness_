@@ -6,7 +6,7 @@
     <title>PanDa Fit AI - V28</title>
     
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="PanFit">
+    <meta name="apple-mobile-web-app-title" content="PanDiet">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
@@ -33,7 +33,7 @@
         
         <div id="page-home" class="space-y-4 block">
             <div class="glass-dark p-6 text-white rounded-[2.5rem] text-center">
-                <h1 class="font-montserrat text-2xl font-black mb-6 text-emerald-400 italic uppercase tracking-tighter">PanDa Fit</h1>
+                <h1 class="font-montserrat text-2xl font-black mb-6 text-emerald-400 italic uppercase tracking-tighter">PanDiet</h1>
                 <div class="grid grid-cols-2 gap-3 mb-6">
                     <button id="btn-rest" onclick="setMode('rest')" class="mode-btn text-xs py-3.5 font-bold uppercase">休息日</button>
                     <button id="btn-chest" onclick="setMode('chest')" class="mode-btn text-xs py-3.5 font-bold uppercase">練胸日</button>
@@ -42,8 +42,8 @@
                 </div>
                 <div class="flex items-center justify-between bg-white/5 p-4 rounded-[1.5rem] border border-white/10">
                     <div class="flex flex-col text-left">
-                        <span class="text-xs font-black uppercase text-emerald-300 italic">Cardio Boost</span>
-                        <span class="text-[9px] text-slate-400">+40min (250k)</span>
+                        <span class="text-xs font-black uppercase text-emerald-300 italic">增加有氧</span>
+                        <span class="text-[9px] text-slate-400">多做 40min 消耗約 250kcal</span>
                     </div>
                     <button id="btn-cardio" onclick="toggleCardio()" class="bg-slate-700 w-12 h-6 rounded-full relative transition-all">
                         <div id="cardio-circle" class="absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-all"></div>
@@ -165,22 +165,29 @@
     const calOffset = { rest: -300, chest: -200, back: -100, leg: 0 };
     const carbBase = { rest: 150, chest: 175, back: 200, leg: 250 };
 
-    const GEMINI_API_KEY = "這裡貼上新的Key"; 
-    const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+    const GEMINI_API_KEY = "AIzaSyDhzqmJkPO23GCtIt38zI24wMfroBidpNg"; 
+    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
     const defaultMeals = {
         'sub-std': { n: 'Subway 鮮嫩雞柳', c: 350, p: 25, carb: 45 },
+        'sub-egg': { n: 'Subway 鮮嫩雞柳家嫩煎蛋', c: 382, p: 32.3, carb: 45 },
+        'sub-double': { n: 'Subway 鮮嫩雞柳加肉', c: 480, p: 45, carb: 48 },
+        'sub-beef': { n: 'Subway 嫩牛加嫩煎蛋', c: 520, p: 35, carb: 50 },
         'sukiya': { n: 'Sukiya 肉大碗+湯+菜', c: 1050, p: 40, carb: 120 },
         'tofu': { n: '涓豆腐泡菜鍋', c: 650, p: 40, carb: 35 },
         'beef-noodle': { n: '牛肉麵+2蛋+青菜', c: 950, p: 55, carb: 85 },
         'pot-chicken': { n: '個人火鍋雞腿+3蛋', c: 750, p: 55, carb: 15 },
-        'convi-chicken': { n: '超商兩塊雞胸肉', c: 260, p: 54, carb: 4 }
+        'convi-chicken': { n: '超商兩塊雞胸肉', c: 260, p: 54, carb: 4 },
+        'bbq-bomb': { n: '個人燒肉組合+飯', c: 1450, p: 85, carb: 70 }
     };
 
     const defaultDrinks = {
         'gg-1': { n: '果果蛋白 1份', c: 102.5, p: 18.4, carb: 3 },
+        'gg-15': { n: '果果蛋白 1.5份', c: 153.8, p: 27.6, carb: 4.5 },
+        'gg-2': { n: '果果蛋白 2份', c: 205, p: 36.8, carb: 6 },
         'baseu': { n: 'BASE&U 紅茶牛乳', c: 148.8, p: 22.2, carb: 9.6 },
-        'soy': { n: '濃豆漿', c: 190, p: 19.1, carb: 7.9 }
+        'soy': { n: '濃豆漿', c: 190, p: 19.1, carb: 7.9 },
+        'oat': { n: '桂格無糖燕麥飲', c: 125, p: 3.8, carb: 21.5 }
     };
 
     // --- 2. 核心功能 ---
