@@ -215,7 +215,7 @@
         }
     }
 
-    window.setEntryType = (type) => {
+    window。setEntryType = (type) => {
         currentEntryType = type;
         hapticFeedback();
         const mealBtn = document.getElementById('type-meal'), drinkBtn = document.getElementById('type-drink');
@@ -248,14 +248,14 @@
     };
 
     // 💡 關鍵修正：加入錯誤處理
-    recognition.onerror = (event) => {
+    recognition。onerror = (event) => {
         console。error("語音辨識錯誤:", event.error);
         if (event.error === 'not-allowed') {
             alert("麥克風權限被拒絕，請檢查瀏覽器設定或是否使用 HTTPS。");
         } else if (event.error === 'no-speech') {
             alert("沒偵測到聲音，請再試一次。");
         }
-        micBtn.innerText = '🎙️';
+        micBtn。innerText = '🎙️';
     };
 
     recognition.onresult = (event) => {
@@ -272,7 +272,7 @@
     };
 
     try {
-        recognition.start();
+        recognition。start();
     } catch (e) {
         console.log("辨識啟動失敗:", e);
     }
@@ -291,7 +291,7 @@
         
         1. Subway 6吋堡基準：350k/25P/45C。
         2. 手搖飲700ml無糖鮮奶茶：170k/8P/12C，無糖則碳水僅來自鮮奶乳糖。
-        3. 熟雞胸肉100g含31P。
+        3. 熟雞胸肉100g含23P。
         請嚴格回傳 JSON：{"name":"名稱","kcal":數字,"protein":數字,"carbs":數字,"confidence":0-1,"reasoning":"計算邏輯"}`;
 
         try {
