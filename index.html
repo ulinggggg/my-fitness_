@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PanDiet AI - V28</title>
+    <title>PanDa Fit AI - V28 (Fix: Auto-Reset)</title>
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="PanDiet">
@@ -234,7 +234,6 @@
         document.getElementById('ai-loading').classList.remove('hidden');
          const prompt = "你是一位運動營養師。分析：" + q + "。邏輯：Subway 6吋堡基準(350k/25P/45C)；無糖鮮奶茶700ml(170k/8P/12C)；熟雞胸肉100g含31P。請僅回傳 JSON：{\"name\":\"名稱\",\"kcal\":數字,\"protein\":數字,\"carbs\":數字,\"confidence\":0.8,\"reasoning\":\"邏輯\"}";
         
-        
         try {
             const resp = await fetch(GEMINI_URL, {
                 method: 'POST',
@@ -351,18 +350,41 @@
     window.editMeal = function(i) { editingIndex = i; const m = customMeals[i]; document.getElementById('manual-name').value = m.n; document.getElementById('manual-cal').value = m.c; document.getElementById('manual-pro').value = m.p; document.getElementById('manual-carb').value = m.carb; setEntryType(m.type||'meal'); switchPage('home'); };
     window.deleteMeal = function(i) { if(confirm("確定刪除？")) { customMeals.splice(i, 1); updateUI(); } };
 
-    function save() { localStorage.setItem('panda_fit_v28', JSON.stringify({ totalProtein, totalCalories, totalWater, totalCarbs, isCardio, currentMode, foodLog, customMeals })); }
+    // --- 關鍵修復：自動歸零邏輯 ---
+    function save() { 
+        const today = new Date().toLocaleDateString('zh-TW'); // 取得今日日期 (例如 "2026/4/23")
+        localStorage.setItem('panda_fit_v28', JSON.stringify({ 
+            totalProtein, totalCalories, totalWater, totalCarbs, 
+            isCardio, currentMode, foodLog, customMeals,
+            lastUpdateDate: today // 存入日期戳記
+        })); 
+    }
+
     function load() {
         try {
             const s = localStorage.getItem('panda_fit_v28');
             if(s) {
                 const d = JSON.parse(s);
-                totalProtein = d.totalProtein||0; totalCalories = d.totalCalories||0; totalWater = d.totalWater||0; totalCarbs = d.totalCarbs||0;
-                isCardio = d.isCardio||false; currentMode = d.currentMode||'rest'; foodLog = d.foodLog||[]; customMeals = d.customMeals||[];
+                const today = new Date().toLocaleDateString('zh-TW');
+
+                // 比對日期，如果不是今天，則重置每日數值
+                if (d.lastUpdateDate && d.lastUpdateDate !== today) {
+                    totalProtein = 0; totalCalories = 0; totalWater = 0; totalCarbs = 0;
+                    foodLog = [];
+                    // 以下項目保留，不需要每日重置
+                    isCardio = false; 
+                    currentMode = d.currentMode || 'rest';
+                    customMeals = d.customMeals || [];
+                } else {
+                    // 同一天，正常載入
+                    totalProtein = d.totalProtein||0; totalCalories = d.totalCalories||0; totalWater = d.totalWater||0; totalCarbs = d.totalCarbs||0;
+                    isCardio = d.isCardio||false; currentMode = d.currentMode||'rest'; foodLog = d.foodLog||[]; customMeals = d.customMeals||[];
+                }
             }
         } catch(e) { console.log("讀取失敗"); }
     }
-    function resetData() { if(confirm("確定重置？")) { totalCalories=0; totalProtein=0; totalCarbs=0; totalWater=0; foodLog=[]; updateUI(); } }
+
+    function resetData() { if(confirm("確定重置今日數據？")) { totalCalories=0; totalProtein=0; totalCarbs=0; totalWater=0; foodLog=[]; updateUI(); } }
 
     load(); updateUI();
 </script>
