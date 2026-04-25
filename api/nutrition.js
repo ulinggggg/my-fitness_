@@ -1,12 +1,13 @@
 export default async function handler(req, res) {
-    // 1. 取得前端傳來的食物名稱
     const { food } = req.query;
-    
-    // 2. 從 Vercel 後台讀取隱藏的 Key
-    const API_KEY = process.env.GEMINI_KEY; 
+    const API_KEY = process.env.GEMINI_KEY;
 
-    // 3. 設定穩定版 Gemini 模型網址 (建議用 1.5-flash)
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${GEMINI_API_KEY}`;
+    // 💡 診斷 1: 檢查 Key 是否存在
+    if (!API_KEY) {
+        return res.status(500).json({ error: "轉運站保險箱是空的！請在 Vercel 設定 GEMINI_KEY 環境變數並 Redeploy。" });
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
     try {
         const response = await fetch(url, {
@@ -22,10 +23,14 @@ export default async function handler(req, res) {
         });
 
         const data = await response.json();
-        
-        // 4. 將 Google 的回傳結果轉發給前端
+
+        // 💡 診斷 2: 檢查 Google 是否報錯
+        if (data.error) {
+            return res.status(500).json({ error: "Google API 報錯", details: data.error.message });
+        }
+
         res.status(200).json(data);
     } catch (error) {
-        res.status(500).json({ error: "AI 轉接失敗", message: error.message });
+        res.status(500).json({ error: "轉運站電路短路", message: error.message });
     }
 }
