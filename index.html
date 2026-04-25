@@ -165,8 +165,29 @@
     const calOffset = { rest: -300, chest: -200, back: -100, leg: 0 };
     const carbBase = { rest: 150, chest: 175, back: 200, leg: 250 };
 
-    const GEMINI_API_KEY = "AIzaSyAcieafGhYJF_Q1An48aBebyPjBpV824NA"; 
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${GEMINI_API_KEY}`;
+   // --- 1. 動態獲取 API Key ---
+    let GEMINI_API_KEY = localStorage.getItem('PAN_DA_SECRET');
+
+    // 如果沒存過，或者 Key 是空的，才彈出詢問
+    if (!GEMINI_API_KEY) {
+    GEMINI_API_KEY = prompt("請輸入您的 Gemini API Key (只需輸入一次，將存於本機):");
+    if (GEMINI_API_KEY) {
+        localStorage.setItem('PAN_DA_SECRET', GEMINI_API_KEY);
+    }
+}
+
+    // 這樣之後的 URL 就會自動帶入這個變數
+    const MODEL_NAME = "gemini-3.1-flash-lite-preview"; 
+    const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL_NAME + ":generateContent?key=" + GEMINI_API_KEY;
+
+    // --- 2. 增加一個「重設 Key」的功能 (防止 Key 報廢想換新的) ---
+    function updateApiKey() {
+    const newKey = prompt("請輸入新的 API Key:", GEMINI_API_KEY);
+    if (newKey) {
+        localStorage.setItem('PAN_DA_SECRET', newKey);
+        location.reload(); // 重新整理網頁套用新 Key
+    }
+}
 
     const defaultMeals = {
         'sub-std': { n: 'Subway 鮮嫩雞柳', c: 350, p: 25, carb: 45 },
