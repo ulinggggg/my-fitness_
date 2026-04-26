@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PanDiet AI - V36 Final</title>
     
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="PanDiet">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Montserrat:wght@700;900&display=swap');
@@ -150,8 +154,17 @@
             <button onclick="switchPage('data')" id="nav-data" class="nav-item">⚙️<br>DATA</button>
         </nav>
     </div>
-
+    
 <script>
+
+    // 註冊 Service Worker 觸發「安裝」按鈕出現
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('PanDiet PWA 註冊成功'))
+                .catch(err => console.log('PWA 註冊失敗', err));
+        });
+    }
     // --- 1. 核心數據與完整清單 ---
     let totalProtein = 0, totalCalories = 0, totalWater = 0, totalCarbs = 0;
     let isCardio = false, currentMode = 'rest', foodLog = [], customMeals = [];
