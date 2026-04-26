@@ -14,18 +14,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Montserrat:wght@700;900&display=swap');
         body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
-        .font-montserrat { font-family: 'Montserrat', sans-serif; }
-        .glass-dark { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .bento-card { border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .mode-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; transition: 0.3s; border-radius: 1rem; }
-        .mode-active { background-color: #ffffff !important; color: #0f172a !important; font-weight: 900 !important; transform: scale(1.05); }
-        .nav-capsule { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 280px; padding: 8px; background: rgba(15, 23, 42, 0.95); border-radius: 2rem; display: flex; z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; }
-        .nav-item.active { color: #10b981; }
-        .progress-bar { transition: width 0.8s ease-in-out; }
+        。font-montserrat { font-family: 'Montserrat', sans-serif; }
+        。glass-dark { background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        。bento-card { border-radius: 2.5rem; background: white; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        。mode-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; transition: 0.3s; border-radius: 1rem; }
+        。mode-active { background-color: #ffffff !important; color: #0f172a !important; font-weight: 900 !important; transform: scale(1.05); }
+        。nav-capsule { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); width: 280px; padding: 8px; background: rgba(15, 23, 42, 0.95); border-radius: 2rem; display: flex; z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
+        。nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; color: #64748b; }
+        。nav-item.active { color: #10b981; }
+        。progress-bar { transition: width 0.8s ease-in-out; }
         @keyframes alert-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .bar-overlimit { animation: alert-pulse 0.8s infinite !important; background-color: #ef4444 !important; }
-        .bar-warning { background-color: #f97316 !important; }
+        。bar-overlimit { animation: alert-pulse 0.8s infinite !important; background-color: #ef4444 !important; }
+        。bar-warning { background-color: #f97316 !important; }
     </style>
 </head>
 <body class="pb-32 text-left">
@@ -231,40 +231,56 @@
     const q = document.getElementById('ai-query').value.trim();
     if (!q) return;
 
-    // 1. 顯示載入中
     document.getElementById('ai-loading').classList.remove('hidden');
     const btn = document.getElementById('ai-btn');
     if(btn) btn.innerText = "⏳";
 
     try {
-        // 💡 關鍵更換：不再呼叫 Google，而是呼叫妳 GitHub 裡的 api/nutrition.js
-        // 我們把食物名稱 q 傳過去，轉運站會幫妳組合「營養師邏輯」並帶上 Key
+        // 💡 確保這裡呼叫的是相對路徑
         const resp = await fetch(`/api/nutrition?food=${encodeURIComponent(q)}`);
         
-        if (!resp.ok) throw new Error("轉運站連線失敗");
+        // 如果 404 或 500，直接報錯
+        if (!resp.ok) {
+            const errorData = await resp.json();
+            throw new Error(errorData.error || `伺服器連線失敗: ${resp.status}`);
+        }
 
         const data = await resp.json();
-        
-        // 2. 解析回傳內容 (結構保持不變)
+        console.log("AI 原始回傳數據:", data); // 👈 偵錯用：按下 F12 看這裡
+
+        // 💡 加入安全檢查，防止 candidates[0] 讀不到導致當機
+        if (!data.candidates || data.candidates.length === 0) {
+            throw new Error("AI 沒有回傳有效內容，可能是觸發了安全過濾。");
+        }
+
         const text = data.candidates[0].content.parts[0].text;
-        const res = JSON.parse(text.match(/\{.*\}/s)[0]);
         
-        // 3. 填入 UI
+        // 嘗試解析 JSON 字串
+        let res;
+        try {
+            res = JSON.parse(text.match(/\{.*\}/s)[0]);
+        } catch (parseError) {
+            console.error("JSON 解析失敗，原始文字為:", text);
+            throw new Error("AI 回傳格式異常，無法解析數值。");
+        }
+        
+        // 填入 UI
         document.getElementById('manual-name').value = res.name;
-        document.getElementById('manual-cal').value = res.kcal;
-        document.getElementById('manual-pro').value = res.protein;
-        document.getElementById('manual-carb').value = res.carbs;
+        document.getElementById('manual-cal').value = res.kcal || res.calories || 0;
+        document.getElementById('manual-pro').value = res.protein || 0;
+        document.getElementById('manual-carb').value = res.carbs || 0;
         
         const reasonEl = document.getElementById('ai-reasoning');
         if(reasonEl) {
-            reasonEl.innerText = "AI 邏輯：" + (res.reasoning || "模型計算");
+            reasonEl.innerText = "分析成功！" + (res.reasoning || "");
             reasonEl.classList.remove('hidden');
         }
         
         hapticFeedback();
+
     } catch (e) {
-        console.error("AI 錯誤:", e);
-        alert("分析失敗：請確認 GitHub 上的 api 資料夾名稱是否正確(無冒號)，且 Vercel 已設定 GEMINI_KEY。");
+        console.error("前端錯誤詳情:", e);
+        alert("分析失敗: " + e.message);
     } finally {
         document.getElementById('ai-loading').classList.add('hidden');
         if(btn) btn.innerText = "✨";
