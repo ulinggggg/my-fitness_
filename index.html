@@ -236,26 +236,41 @@
 
     // --- 4. AI 功能 ---
     async function askGemini() {
-        const q = document.getElementById('ai-query').value.trim();
-        if (!q) return;
-        document.getElementById('ai-loading').classList.remove('hidden');
-        const btn = document.getElementById('ai-btn'); btn.innerText = "⏳";
+    const q = document.getElementById('ai-query').value.trim();
+    if (!q) return;
 
+    document.getElementById('ai-loading').classList.remove('hidden');
+    
+    try {
+        const resp = await fetch(`/api/nutrition?food=${encodeURIComponent(q)}`);
+        
+        // 💡 關鍵修正：先拿文字內容，避免解析 JSON 直接噴錯
+        const rawText = await resp.text();
+        console.log("原始回傳內容:", rawText);
+
+        let data;
         try {
-            const resp = await fetch(`${PROXY_ENDPOINT}?food=${encodeURIComponent(q)}`);
-            const data = await resp.json();
-            const text = data.candidates[0].content.parts[0].text;
-            const res = JSON.parse(text.match(/\{.*\}/s)[0]);
-            
-            document.getElementById('manual-name').value = res.name;
-            document.getElementById('manual-cal').value = res.kcal;
-            document.getElementById('manual-pro').value = res.protein;
-            document.getElementById('manual-carb').value = res.carbs;
-            hapticFeedback();
-        } catch (e) { alert("AI 分析失敗，請檢查 Vercel 部署。"); console.error(e); } 
-        finally { document.getElementById('ai-loading').classList.add('hidden'); btn.innerText = "✨"; }
-    }
+            data = JSON.parse(rawText);
+        } catch (e) {
+            throw new Error("伺服器回傳了非 JSON 格式的內容，請查看 Console 紀錄。");
+        }
 
+        const aiText = data.candidates[0].content.parts[0].text;
+        const res = JSON.parse(aiText.match(/\{.*\}/s)[0]);
+        
+        document.getElementById('manual-name').value = res.name;
+        document.getElementById('manual-cal').value = res.kcal;
+        document.getElementById('manual-pro').value = res.protein;
+        document.getElementById('manual-carb').value = res.carbs;
+        
+        hapticFeedback();
+    } catch (e) {
+        console.error("DEBUG:", e);
+        alert("分析失敗: " + e.message);
+    } finally {
+        document.getElementById('ai-loading').classList.add('hidden');
+    }
+}
     function startVoiceRecognition() {
         const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRec) return;
