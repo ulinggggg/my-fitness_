@@ -1,5 +1,4 @@
-// 注意：我們把 export default 改成 module.exports
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     const { food } = req.query;
     const API_KEY = process.env.GEMINI_KEY;
 
@@ -24,15 +23,15 @@ module.exports = async (req, res) => {
 
         const data = await response.json();
 
-        // 如果 Google 報錯 (例如 Key 打錯)，直接抓出來
+        // 檢查 Google 是否有報錯（例如 Key 打錯）
         if (data.error) {
             return res.status(200).json({ 
-                candidates: [{ content: { parts: [{ text: `{"name":"Key 異常","kcal":0,"protein":0,"carbs":0,"reasoning":"${data.error.message}"}` }] } }] 
+                candidates: [{ content: { parts: [{ text: `{"name":"Google 報錯","kcal":0,"protein":0,"carbs":0,"reasoning":"${data.error.message}"}` }] } }] 
             });
         }
 
         res.status(200).json(data);
     } catch (error) {
-        res.status(500).json({ error: "轉運站崩潰", message: error.message });
+        res.status(500).json({ error: "轉運站連線異常", message: error.message });
     }
-};
+}
